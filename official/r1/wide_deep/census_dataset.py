@@ -168,6 +168,7 @@ def input_fn(data_file, num_epochs, shuffle, batch_size):
     columns = tf.decode_csv(value, record_defaults=_CSV_COLUMN_DEFAULTS)
     features = dict(zip(_CSV_COLUMNS, columns))
     labels = features.pop('income_bracket')
+    tf.logging.info(f'labels---:{labels}')
     classes = tf.equal(labels, '>50K')  # binary classification
     return features, classes
 
