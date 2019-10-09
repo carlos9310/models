@@ -25,6 +25,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--batch_size', default=100, type=int, help='batch size')
 parser.add_argument('--train_steps', default=1000, type=int,
                     help='number of training steps')
+parser.add_argument('--model_dir', default='/tmp/custom_estimator/', type=str,
+                    help='number of training steps')
 
 def my_model(features, labels, mode, params):
     """DNN with three hidden layers and learning_rate=0.1."""
@@ -82,6 +84,7 @@ def main(argv):
     # Build 2 hidden layer DNN with 10, 10 units respectively.
     classifier = tf.estimator.Estimator(
         model_fn=my_model,
+        model_dir=args.model_dir,
         params={
             'feature_columns': my_feature_columns,
             # Two hidden layers of 10 nodes each.
