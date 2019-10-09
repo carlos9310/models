@@ -71,7 +71,8 @@ def my_model(features, labels, mode, params):
     assert mode == tf.estimator.ModeKeys.TRAIN
 
     optimizer = tf.train.AdagradOptimizer(learning_rate=0.1)
-    train_op = optimizer.minimize(loss, global_step=tf.train.get_global_step())
+    global_step=tf.train.get_global_step()
+    train_op = optimizer.minimize(loss, global_step=global_step)
     
     # add LoggingTensorHook
     tensors_log = {
