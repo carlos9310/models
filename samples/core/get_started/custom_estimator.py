@@ -34,11 +34,6 @@ def my_model(features, labels, mode, params):
     net = tf.feature_column.input_layer(features, params['feature_columns'])
     for units in params['hidden_units']:
         net = tf.layers.dense(net, units=units, activation=tf.nn.relu)
-
-    # add trainable_variables
-    tvars = tf.trainable_variables()
-    for var in tvars:
-        print(f'name = {var.name}, shape = {var.shape}, value = {var.value}')
         
     # Compute logits (1 per class).
     logits = tf.layers.dense(net, params['n_classes'], activation=None)
@@ -74,12 +69,19 @@ def my_model(features, labels, mode, params):
     global_step=tf.train.get_global_step()
     train_op = optimizer.minimize(loss, global_step=global_step)
     
+    
+    # add trainable_variables
+    tvars = tf.trainable_variables()
+    for var in tvars:
+        print(f'name = {var.name}, shape = {var.shape}, value = {var.value}')
+        
     # add LoggingTensorHook
     tensors_log = {
         'global_step': global_step,
         'acc': accuracy[1],
         'loss': loss,
-        # tvars[1].name: tvars[1].value() # 监控动态权重参数
+        'labels': labels,  
+        # tvars[1].name: tvars[1].value(), # 监控动态权重参数
     }
     training_hooks = tf.train.LoggingTensorHook(
         tensors=tensors_log, every_n_iter=1)
