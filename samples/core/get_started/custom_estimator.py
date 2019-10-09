@@ -168,12 +168,12 @@ def main(argv):
     # saved_model_cli run --input_expr
     classifier.export_savedmodel(args.raw_export_dir, raw_serving_input_fn, as_text=False)
 
-#     # 参考simple_estimator.py 
-#     # saved_model_cli run --input_examples
-#     # feature规范(解析规范)，指明解析序列化的example时需遵循的解析规范
-#     feature_spec = tf.feature_column.make_parse_example_spec(feature_columns=my_feature_columns)
-#     parsing_serving_input_fn = tf.estimator.export.build_parsing_serving_input_receiver_fn(feature_spec)
-#     classifier.export_savedmodel(args.parsing_export_dir, parsing_serving_input_fn, as_text=False)
+    # 参考simple_estimator.py 
+    # saved_model_cli run --input_examples
+    # feature规范(解析规范)，指明解析序列化的example时需遵循的解析规范
+    feature_spec = tf.feature_column.make_parse_example_spec(feature_columns=my_feature_columns)
+    parsing_serving_input_fn = tf.estimator.export.build_parsing_serving_input_receiver_fn(feature_spec)
+    classifier.export_savedmodel(args.parsing_export_dir, parsing_serving_input_fn, as_text=False)
 
 
 if __name__ == '__main__':
