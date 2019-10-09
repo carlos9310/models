@@ -35,6 +35,11 @@ def my_model(features, labels, mode, params):
     for units in params['hidden_units']:
         net = tf.layers.dense(net, units=units, activation=tf.nn.relu)
 
+    # add trainable_variables
+    tvars = tf.trainable_variables()
+    for var in tvars:
+        print(f'name = {var.name}, shape = {var.shape}, value = {var.value}')
+        
     # Compute logits (1 per class).
     logits = tf.layers.dense(net, params['n_classes'], activation=None)
 
@@ -67,7 +72,17 @@ def my_model(features, labels, mode, params):
 
     optimizer = tf.train.AdagradOptimizer(learning_rate=0.1)
     train_op = optimizer.minimize(loss, global_step=tf.train.get_global_step())
-    return tf.estimator.EstimatorSpec(mode, loss=loss, train_op=train_op)
+    
+    # add LoggingTensorHook
+    tensors_log = {
+        'global_step': global_step,
+        'acc': accuracy[1],
+        'loss': loss,
+        # tvars[1].name: tvars[1].value() # 监控动态权重参数
+    }
+    training_hooks = tf.train.LoggingTensorHook(
+        tensors=tensors_log, every_n_iter=1)
+    return tf.estimator.EstimatorSpec(mode, loss=loss, train_op=train_op, training_hooks=[training_hooks])
 
 
 def main(argv):
