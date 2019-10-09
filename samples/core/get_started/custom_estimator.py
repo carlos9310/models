@@ -26,7 +26,24 @@ parser.add_argument('--batch_size', default=100, type=int, help='batch size')
 parser.add_argument('--train_steps', default=1000, type=int,
                     help='number of training steps')
 parser.add_argument('--model_dir', default='/tmp/custom_estimator/', type=str,
-                    help='number of training steps')
+                    help='dir of trained model')
+parser.add_argument('--raw_export_dir', default='raw_export_dir', type=str,
+                    help='dir of exported model for raw serving input receiver fn')
+parser.add_argument('--parsing_export_dir', default='parsing_export_dir', type=str,
+                    help='dir of exported model for parsing serving input receiver fn')
+
+def raw_serving_input_fn():
+    SepalLength = tf.placeholder(tf.float32, [None], name='SepalLength')
+    SepalWidth = tf.placeholder(tf.float32, [None], name='SepalWidth')
+    PetalLength = tf.placeholder(tf.float32, [None], name='PetalLength')
+    PetalWidth = tf.placeholder(tf.float32, [None], name='PetalWidth')
+    input_fn = tf.estimator.export.build_raw_serving_input_receiver_fn({
+        'SepalLength': SepalLength,
+        'SepalWidth': SepalWidth,
+        'PetalLength': PetalLength,
+        'PetalWidth': PetalWidth,
+    })()
+    return input_fn
 
 def my_model(features, labels, mode, params):
     """DNN with three hidden layers and learning_rate=0.1."""
@@ -87,6 +104,7 @@ def my_model(features, labels, mode, params):
         tensors=tensors_log, every_n_iter=1)
     return tf.estimator.EstimatorSpec(mode, loss=loss, train_op=train_op, training_hooks=[training_hooks])
 
+  
 
 def main(argv):
     args = parser.parse_args(argv[1:])
@@ -144,6 +162,18 @@ def main(argv):
 
         print(template.format(iris_data.SPECIES[class_id],
                               100 * probability, expec))
+        
+    #[add] Export the model.
+    
+    # saved_model_cli run --input_expr
+    classifier.export_savedmodel(args.raw_export_dir, raw_serving_input_fn, as_text=False)
+
+    # 参考simple_estimator.py 
+    # saved_model_cli run --input_examples
+    # feature规范(解析规范)，指明解析序列化的example时需遵循的解析规范
+    feature_spec = tf.feature_column.make_parse_example_spec(feature_columns=my_feature_columns)
+    parsing_serving_input_fn = tf.estimator.export.build_parsing_serving_input_receiver_fn(feature_spec)
+    classifier.export_savedmodel(args.parsing_export_dir, parsing_serving_input_fn, as_text=False)
 
 
 if __name__ == '__main__':
