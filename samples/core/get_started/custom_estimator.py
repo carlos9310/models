@@ -74,10 +74,17 @@ def my_model(features, labels, mode, params):
                                    name='acc_op')
     metrics = {'accuracy': accuracy}
     tf.summary.scalar('accuracy', accuracy[1])
+    
+    eval_log = {
+        'labels':labels,
+        'predicted_classes':predicted_classes
+    }
+    eval_hooks = tf.train.LoggingTensorHook(
+        tensors=eval_log, every_n_iter=1)
 
     if mode == tf.estimator.ModeKeys.EVAL:
         return tf.estimator.EstimatorSpec(
-            mode, loss=loss, eval_metric_ops=metrics)
+            mode, loss=loss, eval_metric_ops=metrics, evaluation_hooks=[eval_hooks])
 
     # Create training op.
     assert mode == tf.estimator.ModeKeys.TRAIN
